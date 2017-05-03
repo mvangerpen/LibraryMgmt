@@ -17,7 +17,7 @@ public class CustomerDetailsGUI extends JFrame {
     private JTextField customerIDField;
     private JTextField dateAddedField;
     private JTextField paymentField;
-    private JButton addEditButton;
+    private JButton editButton;
     private JTextField lastNameField;
     private JButton updateButton;
     private JPanel mainPanel;
@@ -76,6 +76,7 @@ public class CustomerDetailsGUI extends JFrame {
         setContentPane(mainPanel);
         pack();
         setVisible(true);
+
     }
 
     void addListeners() {
@@ -93,6 +94,15 @@ public class CustomerDetailsGUI extends JFrame {
 
 
                 //controller.updateCustomer(customer);
+
+            }
+        });
+
+
+        editButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                //TODO: open card window. Need to send Customer information
 
             }
         });
