@@ -26,7 +26,7 @@ public class CustomerSearchGUI extends JFrame {
 
 
     CustomerSearchGUI(Controller controller) {
-        super("Mybrarian: Search Customer");
+        super("Mybrarian: Search Mybrarians");
 
         //create reference to controller
         this.controller = controller;

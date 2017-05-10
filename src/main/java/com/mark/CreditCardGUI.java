@@ -31,7 +31,7 @@ public class CreditCardGUI extends JFrame {
 
     public CreditCardGUI(Controller controller, CreditCard oldCard) {
 
-        super("Mybrarian: Add Payment");
+        super("Mybrarian: Edit Payment");
 
         //create reference to controller
         this.controller = controller;

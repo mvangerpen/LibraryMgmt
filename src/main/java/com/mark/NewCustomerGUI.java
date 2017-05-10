@@ -40,7 +40,7 @@ public class NewCustomerGUI extends JFrame {
     private int newID;  // Contains class-specific variables
 
     NewCustomerGUI(Controller controller) {
-        super("Mybrarian: Add New Customer");
+        super("Mybrarian: Add New Mybrarian");
 
         //create reference to controller
         this.controller = controller;
