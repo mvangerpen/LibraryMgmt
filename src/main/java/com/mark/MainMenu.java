@@ -15,7 +15,7 @@ public class MainMenu extends JFrame {
     private final Controller controller;
 
     MainMenu(Controller controller) {
-        super("Mybrarian: Main Menu");
+        super("Mybrary: Main Menu");
 
         //create reference to controller
         this.controller = controller;

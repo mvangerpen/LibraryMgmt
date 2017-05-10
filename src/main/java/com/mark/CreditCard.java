@@ -33,30 +33,11 @@ class CreditCard {
 
     }
 
-    private String hideNumbers(Long number) {
-
-        //replace first 12 numbers with * symbols
-        StringBuilder hidden = new StringBuilder();
-        String asString = number.toString();
-        char[] numArray = asString.toCharArray();
-
-        for (int x = 0; x < 16; x++) {
-            if (x <= 11) {
-                hidden.append("*");
-            }
-            else if (x > 11 && x < 16) {
-                hidden.append(numArray[x]);
-            }
-        }
-
-        return hidden.toString();
-    }   //Replaces first 12 digits of card number with * symbol
-
     private String pullLastFour(Long nu) {
         StringBuilder hidden = new StringBuilder();
-        String asString = number.toString();
+        String asString = nu.toString();
         char[] numArray = asString.toCharArray();
-        for (int x = 15; x > 11; x--) {
+        for (int x = numArray.length - 1; x > (numArray.length - 4); x--) {
             hidden.append(numArray[x]);
         }
         return hidden.toString();

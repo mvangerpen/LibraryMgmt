@@ -9,7 +9,7 @@ class CustTableModel extends AbstractTableModel{
 
     private final Vector<Customer> customerList;
 
-    private final String[] colNames = { "Customer ID", "First Name", "Last Name", "Phone", "Email"};
+    private final String[] colNames = { "MyBrarian ID", "First Name", "Last Name", "Phone", "Email"};
 
     CustTableModel(Vector<Customer> customers) {
         customerList = customers;

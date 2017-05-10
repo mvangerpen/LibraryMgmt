@@ -15,7 +15,6 @@ class Customer {
     String phone;
     String email;
     String creditCard;
-    private int checkedOut;
     private Double totalCharge;
     Date addDate;
 
@@ -23,7 +22,7 @@ class Customer {
 
 
     public Customer(int customerID, String firstName, String lastName, String streetAddress, String cityAddress,
-                    String stateAddress, int zipAddress, String phone, String email, String creditCard, int checkedOut,
+                    String stateAddress, int zipAddress, String phone, String email, String creditCard,
                     Double totalCharge, Date addDate) {
 
         this.customerID = customerID;
@@ -36,7 +35,6 @@ class Customer {
         this.phone = phone;
         this.email = email;
         this.creditCard = creditCard;
-        this.checkedOut = checkedOut;
         this.totalCharge = totalCharge;
         this.addDate = addDate;
     }
@@ -120,14 +118,6 @@ class Customer {
 
     public void setCreditCard(String creditCard) {
         this.creditCard = creditCard;
-    }
-
-    public int getCheckedOut() {
-        return checkedOut;
-    }
-
-    public void setCheckedOut(int checkedOut) {
-        this.checkedOut = checkedOut;
     }
 
     public Date getAddDate() {

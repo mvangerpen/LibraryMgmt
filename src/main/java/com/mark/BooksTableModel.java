@@ -9,7 +9,7 @@ class BooksTableModel extends AbstractTableModel {
 
     private final Vector<Book> booksList;
 
-    private final String[] colNames = { "BookID", "Title", "Author", "ISBN", "Status"};
+    private final String[] colNames = { "MyBookID", "Title", "Author", "ISBN", "Status"};
 
     BooksTableModel(Vector<Book> books) {
         booksList = books;

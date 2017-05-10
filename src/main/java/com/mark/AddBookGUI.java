@@ -24,7 +24,7 @@ public class AddBookGUI extends JFrame {
     private final Controller controller;
 
     AddBookGUI(Controller controller) {
-        super("Mybrarian: Add a Book");
+        super("Mybrary: Add a Book");
 
         //create reference to controller
         this.controller = controller;

@@ -28,7 +28,7 @@ public class ReportsGUI extends JFrame {
     private final ArrayList<Book> booksReport;
 
     ReportsGUI(Controller controller) {
-        super("MyReports");
+        super("Mybrary: MyReports");
 
         this.controller = controller;
 
@@ -95,8 +95,16 @@ public class ReportsGUI extends JFrame {
 
                 } else if (reportOptionsBox.getSelectedItem().toString().equals("In Stock Books")) {
 
-                    for (Book b: allBooks) {
+                    for (Book b : allBooks) {
                         if (b.getStatus().equals("IN")) {
+                            booksReport.add(b);
+                        }
+                    }
+
+                } else if (reportOptionsBox.getSelectedItem().toString().equals("Renewed Books")) {
+
+                    for (Book b: allBooks) {
+                        if (b.getStatus().equals("REN")) {
                             booksReport.add(b);
                         }
                     }

@@ -40,7 +40,7 @@ public class NewCustomerGUI extends JFrame {
     private int newID;  // Contains class-specific variables
 
     NewCustomerGUI(Controller controller) {
-        super("Mybrarian: Add New Mybrarian");
+        super("Mybrary: Add New Mybrarian");
 
         //create reference to controller
         this.controller = controller;
@@ -116,7 +116,6 @@ public class NewCustomerGUI extends JFrame {
 
                 } else {
 
-
                     //Create new customer ID
                     int newID = getNewID();
 
@@ -154,25 +153,28 @@ public class NewCustomerGUI extends JFrame {
                     String phone = phoneField.getText();
                     String email = emailField.getText();
                     String creditCard = newCard.lastFour;
-                    int outBooks = 0;
                     Double totalCharged = 0.00;
                     Date addDate = new Date();
 
                     Customer newCust = new Customer(newID, firstName, lastName, streetAddress, cityAddress,
-                            stateAddress, zipAddress, phone, email, creditCard, outBooks, totalCharged, addDate);
+                            stateAddress, zipAddress, phone, email, creditCard, totalCharged, addDate);
 
-                    try {
-                        //Send card and customer to DB
-                        controller.addCustomer(newCust);
-                        controller.addCC(newCard);
-                        JOptionPane.showMessageDialog(NewCustomerGUI.this, "Created new Mybrarian.\nMybrary ID: " + newCust.getCustomerID());
-                    } catch (Exception e1) {
-                        e1.printStackTrace();
-                        JOptionPane.showMessageDialog(NewCustomerGUI.this, "Error creating customer:\n" + e1.toString());
+                    if (!Controller.isValidCreditCard(String.valueOf(newCard.getNumber()))) {
+                        JOptionPane.showMessageDialog(NewCustomerGUI.this, "Invalid card number. Check number and try again.");
+                    } else {
+                        try {
+                            //Send card and customer to DB
+                            controller.addCustomer(newCust);
+                            controller.addCC(newCard);
+                            JOptionPane.showMessageDialog(NewCustomerGUI.this, "Created new Mybrarian.\nMybrary ID: " + newCust.getCustomerID());
+                        } catch (Exception e1) {
+                            e1.printStackTrace();
+                            JOptionPane.showMessageDialog(NewCustomerGUI.this, "Error creating customer:\n" + e1.toString());
+                        }
+
+                        controller.NewMainMenuGUI();
+                        dispose();
                     }
-
-                    controller.NewMainMenuGUI();
-                    dispose();
                 }
             }
         }); //Sends credit card and customer info to controller. Verifies all fields are full.

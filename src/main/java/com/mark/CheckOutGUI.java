@@ -27,7 +27,7 @@ public class CheckOutGUI extends JFrame {
 
 
     CheckOutGUI(Controller controller, Book book) {
-        super("Mybrarian: Check out, Check in, Renew");
+        super("Mybrary: Check out, Check in, Renew");
 
         //create reference to controller
         this.controller = controller;

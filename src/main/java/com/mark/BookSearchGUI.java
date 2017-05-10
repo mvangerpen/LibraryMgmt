@@ -31,7 +31,7 @@ public class BookSearchGUI extends JFrame {
 
 
     BookSearchGUI(Controller controller) {
-        super("Mybrarian: Browse Mybrary");
+        super("Mybrary: Browse Mybrary");
 
         //create reference to controller
         this.controller = controller;

@@ -43,7 +43,6 @@ class DB {
     private static final String PHONE_COL = "Phone";
     private static final String EMAIL_COL = "Email";
     private static final String CARD_COL = "CreditCard"; //Displays only last four digits of card. Full card must be called from creditcards table.
-    private static final String CHECKOUT_COL = "NumberCheckedOut";
     private static final String TOTAL_CHARGED_COL = "TotalChargeAmt";
     private static final String CREATED_COL = "DateAdded";      //Establish variables for Customers table
 
@@ -101,11 +100,10 @@ class DB {
 
             //Create customers table
             String createCustTableSQLTemplate = "CREATE TABLE IF NOT EXISTS %s (%s INT, %s VARCHAR(50), %s VARCHAR(25), %s VARCHAR(100), " +
-                    "%s VARCHAR(50), %s VARCHAR(2), %s INT, %s VARCHAR(20), %s VARCHAR(50), %s VARCHAR(4), %s INT, %s DOUBLE, %s DATE, " +
+                    "%s VARCHAR(50), %s VARCHAR(2), %s INT, %s VARCHAR(20), %s VARCHAR(50), %s VARCHAR(4), %s DOUBLE, %s DATE, " +
                     "PRIMARY KEY(%s))";
             String createCustTable = String.format(createCustTableSQLTemplate, CUST_TABLE, ID_COL, FNAME_COL, LNAME_COL, STREET_COL,
-                                    CITY_COL, STATE_COL, ZIP_COL, PHONE_COL, EMAIL_COL, CARD_COL, CHECKOUT_COL, TOTAL_CHARGED_COL,
-                    CREATED_COL, ID_COL);
+                                    CITY_COL, STATE_COL, ZIP_COL, PHONE_COL, EMAIL_COL, CARD_COL, TOTAL_CHARGED_COL, CREATED_COL, ID_COL);
             statement.executeUpdate(createCustTable);
 
             //Notify if successful
@@ -289,7 +287,7 @@ class DB {
                 Statement statement = conn.createStatement()) {
 
             //Establish prepared statement, set values from Customer class
-            String addCustSQL = "INSERT INTO " + CUST_TABLE + " VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)";
+            String addCustSQL = "INSERT INTO " + CUST_TABLE + " VALUES(?,?,?,?,?,?,?,?,?,?,?,?)";
             PreparedStatement addCustPS = conn.prepareStatement(addCustSQL);
 
             addCustPS.setInt(1, cust.getCustomerID());
@@ -302,9 +300,8 @@ class DB {
             addCustPS.setString(8, cust.getPhone());
             addCustPS.setString(9, cust.getEmail());
             addCustPS.setString(10, cust.getCreditCard());
-            addCustPS.setInt(11, cust.getCheckedOut());
-            addCustPS.setDouble(12, cust.getTotalCharge());
-            addCustPS.setDate(13, new java.sql.Date(cust.getAddDate().getTime())); //Cast java date to SQL date format
+            addCustPS.setDouble(11, cust.getTotalCharge());
+            addCustPS.setDate(12, new java.sql.Date(cust.getAddDate().getTime())); //Cast java date to SQL date format
 
             //Execute prepared statement
             addCustPS.execute();
@@ -329,10 +326,9 @@ class DB {
 
             //Prep prepared statement
             String updateCustTemplate = "UPDATE %s SET %s = ?, %s = ?, %s = ?, %s = ?, %s = ?, %s = ?," +
-                    " %s = ?, %s = ?, %s = ?, %s = ?, %s = ?, %s = ?, %s = ? WHERE %s = ?";
+                    " %s = ?, %s = ?, %s = ?, %s = ?, %s = ?, %s = ? WHERE %s = ?";
             String updateCust = String.format(updateCustTemplate, CUST_TABLE, ID_COL, FNAME_COL, LNAME_COL, STREET_COL,
-                    CITY_COL, STATE_COL, ZIP_COL, PHONE_COL, EMAIL_COL, CARD_COL, CHECKOUT_COL, TOTAL_CHARGED_COL,
-                    CREATED_COL, ID_COL);
+                    CITY_COL, STATE_COL, ZIP_COL, PHONE_COL, EMAIL_COL, CARD_COL, TOTAL_CHARGED_COL, CREATED_COL, ID_COL);
             PreparedStatement updateCustPS = conn.prepareStatement(updateCust);
 
             updateCustPS.setInt(1, cust.getCustomerID());
@@ -345,10 +341,9 @@ class DB {
             updateCustPS.setString(8, cust.getPhone());
             updateCustPS.setString(9, cust.getEmail());
             updateCustPS.setString(10, cust.getCreditCard());
-            updateCustPS.setInt(11, cust.getCheckedOut());
-            updateCustPS.setDouble(12, cust.getTotalCharge());
-            updateCustPS.setDate(13, new java.sql.Date(cust.getAddDate().getTime())); //Cast java date to SQL date format
-            updateCustPS.setInt(14, cust.getCustomerID());
+            updateCustPS.setDouble(11, cust.getTotalCharge());
+            updateCustPS.setDate(12, new java.sql.Date(cust.getAddDate().getTime())); //Cast java date to SQL date format
+            updateCustPS.setInt(13, cust.getCustomerID());
 
             //Update record
             updateCustPS.executeUpdate();
@@ -685,12 +680,11 @@ class DB {
                 String phone = rsAll.getString(PHONE_COL);
                 String email = rsAll.getString(EMAIL_COL);
                 String creditCard = rsAll.getString(CARD_COL);
-                int checkedOut = rsAll.getInt(CHECKOUT_COL);
                 Double totalCharged = rsAll.getDouble(TOTAL_CHARGED_COL);
                 Date addDate = rsAll.getDate(CREATED_COL);
 
                 Customer custRecord = new Customer(custID, firstName, lastName, streetAddress, cityAddress,
-                        stateAddress, zipAddress, phone, email, creditCard, checkedOut, totalCharged, addDate);
+                        stateAddress, zipAddress, phone, email, creditCard, totalCharged, addDate);
                 allCust.add(custRecord);
             }
 
@@ -775,12 +769,11 @@ class DB {
                 String phone = result.getString(PHONE_COL);
                 String email = result.getString(EMAIL_COL);
                 String creditCard = result.getString(CARD_COL);
-                int checkedOut = result.getInt(CHECKOUT_COL);
                 Double totalCharged = result.getDouble(TOTAL_CHARGED_COL);
                 Date addDate = result.getDate(CREATED_COL);
 
                 fetched = new Customer(custID, firstName, lastName, streetAddress, cityAddress,
-                        stateAddress, zipAddress, phone, email, creditCard, checkedOut, totalCharged, addDate);
+                        stateAddress, zipAddress, phone, email, creditCard, totalCharged, addDate);
             }
 
             //Close connections

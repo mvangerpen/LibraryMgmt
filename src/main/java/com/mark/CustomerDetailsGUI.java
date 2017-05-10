@@ -6,6 +6,7 @@ import javax.swing.*;
 import java.awt.event.*;
 import java.util.Date;
 import java.util.Vector;
+import java.util.ArrayList;
 
 @SuppressWarnings({"ALL", "unchecked"})
 public class CustomerDetailsGUI extends JFrame {
@@ -31,10 +32,11 @@ public class CustomerDetailsGUI extends JFrame {
     //Configure table model
     private JTable booksTable;
     private JButton editCustomerButton;
+    private JTextField amtDueField;
     private Vector<Book> books;
 
     CustomerDetailsGUI(Controller controller, Customer customer) {
-        super("Mybrarian: Customer Details");
+        super("Mybrary: Customer Details");
 
         //create reference to controller
         this.controller = controller;
@@ -59,10 +61,20 @@ public class CustomerDetailsGUI extends JFrame {
         emailField.setText(customer.email);
         paymentField.setText("************" + customer.creditCard);
 
+        Double amtDue = 0.00;
+        //Get amount due
+        ArrayList<Book> getBooks = controller.getAllBooks();
+        for (Book b : getBooks) {
+            amtDue += b.getCharged();
+        }
+
+        amtDueField.setText(String.valueOf(amtDue));
+
         //Lock fields for editing
         customerIDField.setEditable(false);
         dateAddedField.setEditable(false);
         paymentField.setEditable(false);
+        amtDueField.setEditable(false);
 
         //Lock fields that can be unlocked for editing
         firstNameField.setEditable(false);
@@ -154,11 +166,10 @@ public class CustomerDetailsGUI extends JFrame {
                         String phone = phoneField.getText();
                         String email = emailField.getText();
                         String creditCard = card.lastFour;
-                        int outBooks = 0;
                         Date addDate = new Date();
 
                         Customer updateCust = new Customer(custID, firstName, lastName, streetAddress, cityAddress,
-                                stateAddress, zipAddress, phone, email, creditCard, outBooks, customer.getTotalCharge(), addDate);
+                                stateAddress, zipAddress, phone, email, creditCard, customer.getTotalCharge(), addDate);
 
 
                         int choice = JOptionPane.showConfirmDialog(CustomerDetailsGUI.this, "Update credit card with this information?");

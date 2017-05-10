@@ -27,7 +27,7 @@ public class BookDetailsGUI extends JFrame {
 
 
     BookDetailsGUI(Controller controller, Book book) {
-        super("Mybrarian: Book Details");
+        super("Mybrary: MyBook Details");
 
         //create reference to controller
         this.controller = controller;
