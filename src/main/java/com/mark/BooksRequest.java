@@ -1,167 +1,228 @@
-
-//TODO: Get this to work.
-
-/*
-
 package com.mark;
 
-import com.google.api.client.http.*;
-import com.google.api.client.http.json.JsonHttpContent;
-import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.JsonGenerator;
-import com.google.api.client.json.JsonParser;
-import com.google.api.client.json.jackson2.JacksonFactory;
-import com.google.api.services.books.Books;
-import com.google.api.services.books.model.Volume;
-import com.google.api.services.books.model.Volumes;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import javax.swing.*;
 import java.io.*;
-import java.nio.charset.Charset;
-
-import static com.mark.Controller.addBookGUI;
-
-public class BooksRequest
-        extends com.google.api.client.json.rpc2.JsonRpcRequest {
-
-    private JsonFactory factory;
-    private String key;
-    private String isbn = "";
-    private String shortURL;
-    private String fullURL;
-    private Controller controller;
-    private JsonParser parser;
-
-    public BooksRequest() throws Exception {
-
-        this.controller = controller;
-
-        factory = new JsonFactory() {
-            @Override
-            public JsonParser createJsonParser(InputStream inputStream) throws IOException {
-                return null;
-            }
-
-            @Override
-            public JsonParser createJsonParser(InputStream inputStream, Charset charset) throws IOException {
-                return null;
-            }
-
-            @Override
-            public JsonParser createJsonParser(String s) throws IOException {
-                return null;
-            }
-
-            @Override
-            public JsonParser createJsonParser(Reader reader) throws IOException {
-                return null;
-            }
-
-            @Override
-            public JsonGenerator createJsonGenerator(OutputStream outputStream, Charset charset) throws IOException {
-                return null;
-            }
-
-            @Override
-            public JsonGenerator createJsonGenerator(Writer writer) throws IOException {
-                return null;
-            }
-        };
-        key = readKey();
-        isbn = Controller.getISBNForAPI();
-        shortURL = "https://www.googleapis.com/books/v1/volumes?q=";
-
-        fullURL = shortURL + isbn + "&key=" + key;
-
-        GenericUrl address = new GenericUrl(fullURL);
-        HttpRequest request = new HttpRequest();
-
-        JsonHttpContent content = new JsonHttpContent(factory, );
+import java.net.URL;
+import java.util.concurrent.ExecutionException;
 
 
+public class BooksRequest {
 
-        Volume volume = new Volume();
+    public static void getByISBN(String isbn, AddBookGUI addBookGUI) {
 
-        try
-        {
-            Volume.VolumeInfo volumeInfo = volume.getVolumeInfo();
-            System.out.println("Title: " + volumeInfo.getTitle());
-            System.out.println("Id: " + volume.getId());
-            System.out.println("Authors: " + volumeInfo.getAuthors());
-            System.out.println("date published: " + volumeInfo.getPublishedDate());
-            System.out.println();
+        new BookAPIWorker(isbn, addBookGUI).execute();
 
-        } catch (Exception ex) {
-            System.out.println("Did not work: " + ex.toString());
-        }
-
-        //InputStreamReader reader = new InputStreamReader(is);
-
-        //Set up reader and string builder
-        //BufferedReader streamReader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
-        StringBuilder responseStrBuilder = new StringBuilder();
-
-        /*
-        //Read stream to string builder. Convert to string.
-        String inputStr;
-        while ((inputStr = streamReader.readLine()) != null)
-            responseStrBuilder.append(inputStr);
-        String responseStr = responseStrBuilder.toString();
-
-        //Parse string to JSON
-        JsonStreamParser streamParser = new JsonStreamParser(responseStr);
-        //Initialize JSON object
-        JsonObject response = new JsonObject();
-        JsonElement element;
-        int x = 0;
-
-        while (streamParser.hasNext()) {
-            element = streamParser.next();
-            response.add(element.toString(), element);
-            x++;
-        }
-
-        //is.close();
-        */
-
-
-        /*//Convert to JSON object
-
-        JsonObject newObj = new JsonObject(); //May be an array, may be an object.
-        JsonObject response = newObj.getAsJsonObject(reader.toString());
-
-        System.out.println(response.toString());
-        */
-
-        /*
     }
 
+    private static class BookAPIWorker extends SwingWorker<Book, Void> {
 
-    private String readKey() throws Exception {
+        String isbn;
+        AddBookGUI gui;
+
+        public BookAPIWorker(String isbn, AddBookGUI addBookGUI) {
+            this.isbn = isbn;
+            this.gui = addBookGUI;
+        }
+
+        @Override
+        protected Book doInBackground() throws Exception {
+            String nIsbn = "";
+            String title = "";
+            String author = "";
+            String Categories = "";
+            int pages = 0;
+            String pub = "";
+            String pubDate = "";
+            Book toReturn = new Book(0, nIsbn, title, author, Categories, pages, pub, pubDate, "",
+                    0, null, null, 0.00, 0.00);
+
+            String key = readKey(gui);
+
+            if (key == null) {
+                System.out.println("Fix key error. Exiting program");
+            }
+
+            String shortURL = "https://www.googleapis.com/books/v1/volumes?q=isbn:";
+
+            String fullURL = shortURL + isbn + "&key=" + key;
+
+            InputStream is = new URL(fullURL).openConnection().getInputStream();
+
+            InputStreamReader isReader = new InputStreamReader(is);
+            BufferedReader bReader = new BufferedReader(isReader);
+            StringBuilder builder = new StringBuilder();
+
+            String line;
+            while ((line = bReader.readLine()) != null) {
+                builder.append(line);
+            }
+
+            //Convert to string
+            String responseString = builder.toString();
+
+            //Convert string to JSON object
+            JSONArray items = null;
+            JSONObject jsonObject = new JSONObject(responseString);
+
+            try {
+                items = jsonObject.getJSONArray("items");
+            } catch (JSONException jse) {
+                System.out.println(jse.toString());
+                return toReturn;
+            }
+
+
+            //Get top match only
+            try {
+                JSONObject volumeInfo = items.getJSONObject(0).getJSONObject("volumeInfo");
+
+                try {
+                    toReturn.setIsbn(volumeInfo.getJSONArray("industryIdentifiers").getJSONObject(0).getString("identifier"));
+                } catch(Exception e) {
+                    System.out.println(e.toString());
+                    System.out.println("ISBN info not found.");
+                    //return toReturn;
+                }
+
+                try {
+                    toReturn.setTitle(volumeInfo.getString("title"));
+                } catch(Exception e) {
+                    System.out.println(e.toString());
+                    System.out.println("Title not found.");
+                    //return toReturn;
+                }
+
+                try {
+                    toReturn.setPublisher(volumeInfo.getString("publisher"));
+                } catch (Exception e) {
+                    System.out.println(e.toString());
+                    System.out.println("No publisher info.");
+                    //return toReturn;
+                }
+
+                try {
+                    toReturn.setPubDate(volumeInfo.getString("publishedDate"));
+                } catch (Exception e){
+                    System.out.println(e.toString());
+                    System.out.println("Error finding publish date.");
+                    //return toReturn;
+                }
+
+                try {
+                    toReturn.setPages(volumeInfo.getInt("pageCount"));
+                } catch (Exception e) {
+                    System.out.println(e.toString());
+                    System.out.println("Error finding page count.");
+                    //return toReturn;
+                }
+
+                try {
+                    //Establish loops to capture multiple authors and categories
+                    StringBuilder b = new StringBuilder();
+                    int counter = 0;
+                    for (Object x : volumeInfo.getJSONArray("authors")) {
+                        b.append(volumeInfo.getJSONArray("authors").getString(counter));
+                        if (!volumeInfo.getJSONArray("authors").isNull(counter + 1)) {
+                            b.append(", ");
+                            counter++;
+                        }
+                    }
+                    //Send author string
+                    toReturn.setAuthor(b.toString());
+                } catch (Exception e) {
+                    System.out.println(e.toString());
+                    System.out.println("Error retrieving authors.");
+                    //return toReturn;
+                }
+
+                try {
+                    //Reset variables for next String
+                    StringBuilder b = new StringBuilder();
+                    int counter = 0;
+                    for (Object x : volumeInfo.getJSONArray("categories")) {
+                        b.append(volumeInfo.getJSONArray("categories").getString(counter));
+                        if (!volumeInfo.getJSONArray("categories").isNull(counter + 1)) {
+                            b.append(", ");
+                            counter++;
+                        }
+                    }
+                    //Send Categories string
+                    toReturn.setCategories(b.toString());
+                } catch (Exception e) {
+                    System.out.println(e.toString());
+                    System.out.println("Error retrieving Categories.");
+                    //return toReturn;
+                }
+
+            } catch (JSONException jse) {
+                jse.printStackTrace();
+                return toReturn;
+            }
+
+            return toReturn;
+        }
+
+
+        @Override
+        public void done() {
+            try {
+                Book response = get();   // get() fetches whatever doInBackground returns.
+                gui.responseComplete(response);
+
+                String nIsbn = "";
+                String title = "";
+                String author = "";
+                String Categories = "";
+                int pages = 0;
+                String pub = "";
+                String pubDate = "";
+
+                StringBuilder message = new StringBuilder();
+
+                if (response.getIsbn().equals("")) {
+                    message.append("ISBN\n");
+                } else if (response.getTitle().equals("")) {
+                    message.append("Title\n");
+                } else if (response.getAuthor().equals("")) {
+                    message.append("Author\n");
+                } else if (response.getCategories().equals("")) {
+                    message.append("Categories\n");
+                } else if (response.getPages() == 0) {
+                    message.append("Page count\n");
+                } else if (response.getPublisher().equals("")) {
+                    message.append("Publisher\n");
+                } else if (response.getPubDate().equals("")) {
+                    message.append("Publication date");
+                }
+
+                if (message.toString().equals("")) {
+                    JOptionPane.showMessageDialog(gui, "Record complete. Verify entries before adding book.");
+                } else if (message.toString().equals("ISBN\nTitle\nAuthor\nCategories\nPage count\nPublisher\nPublication date")) {
+                    JOptionPane.showMessageDialog(gui, "Record not found. Use manual entry or try alternate ISBN.");
+                } else {
+                    JOptionPane.showMessageDialog(gui, "Incomplete record. Use manual entry for missing fields:\n" + message.toString());
+                }
+
+            } catch (Exception e) {
+                System.out.println(e.toString());
+            }
+        }
+
+
+    private String readKey(AddBookGUI gui) throws Exception {
         try (BufferedReader reader = new BufferedReader(new FileReader("key.txt"))) {
             String key = reader.readLine();
             return key;
         } catch (Exception ioe) {
-            JOptionPane.showMessageDialog(addBookGUI, "API key file not found.");
+            JOptionPane.showMessageDialog(gui, "API key file not found.");
             System.exit(-1);
         }
         return null;
     }
-
-
-    public HttpTransport transport() throws IOException {
-
-        fullURL = shortURL + isbn + "&key=" + key;
-        GenericUrl address = new GenericUrl(fullURL);
-
-        HttpTransport request;
-        HttpRequestFactory newFactory = request.createRequestFactory();
-        newFactory.buildGetRequest(address);
-        return address;
-    };
+}
 }
 
-
-
-
-*/

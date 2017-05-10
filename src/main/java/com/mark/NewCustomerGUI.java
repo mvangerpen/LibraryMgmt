@@ -3,7 +3,10 @@ package com.mark;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.lang.reflect.Array;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Random;
 
@@ -22,6 +25,17 @@ public class NewCustomerGUI extends JFrame {
     private JButton cancelButton;
     private JPanel mainPanel;
     private JButton addPaymentButton;
+    private JTextField cardNameField;
+    private JTextField cardCityAddressField;
+    private JComboBox cardStateComboBox;
+    private JTextField cardZIPAddressField;
+    private JComboBox cardTypeComboBox;
+    private JCheckBox useSameAddressCheckBox;
+    private JTextField cardStreetAddressField;
+    private JTextField csvField;
+    private JComboBox monthBox;
+    private JComboBox yearBox;
+    private JFormattedTextField cardExpirationField;
     private Controller controller;
     private int newID;  // Contains class-specific variables
 
@@ -37,56 +51,100 @@ public class NewCustomerGUI extends JFrame {
         pack();
         setVisible(true);
 
-        //Remove editing from card field
-        cardNumberField.setEditable(false);
-        cardTypeField.setEditable(false);
-
         //Set state combo box options
         for (String x : controller.states) {
             stateComboBox.addItem(x);
+            cardStateComboBox.addItem(x);
         }
 
+        cardTypeComboBox.addItem("VISA");
+        cardTypeComboBox.addItem("MC");
+        cardTypeComboBox.addItem("DISC");
+        cardTypeComboBox.addItem("AMEX");
+
+        //Expiration boxes - tracks five years out
+        LocalDateTime now = LocalDateTime.now();
+        int thisYear = now.getYear();
+        for (int x = 1; x < 13; x++) {
+            monthBox.addItem(x);
+        }
+        for (int x = thisYear; x < thisYear + 5; x++) {
+            yearBox.addItem(x);
+        }
+
+
         //add Listeners
-        addListeners(newID);
+        addListeners();
     }  //Builds New Customer GUI
 
-    void addListeners(int sendID) {
+    void addListeners() {
 
-        addPaymentButton.addActionListener(new ActionListener() {
+
+        useSameAddressCheckBox.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String sendFName = firstNameField.getText();
-                String sendLName = lastNameField.getText();
-                String sendStreet = addressField.getText();
-                String sendCity = cityField.getText();
-                String sendState = (String) stateComboBox.getSelectedItem();
-                String sendZIP = zipField.getText();
-
-                controller.CreditCardGUI(sendFName, sendLName, sendStreet, sendCity, sendState, sendZIP);
-
+                cardNameField.setText(firstNameField.getText() + " " + lastNameField.getText());
+                cardStreetAddressField.setText(addressField.getText());
+                cardCityAddressField.setText(cityField.getText());
+                cardStateComboBox.setSelectedItem(stateComboBox.getSelectedItem());
+                cardZIPAddressField.setText(String.valueOf(zipField.getText()));
             }
-        }); //Opens new credit card window. Current remains open. Sends name and address info to new window.
+        }); //Fills relevant fields with data from customer fields
 
         addButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
 
-                if (controller.getHoldCard() == null) {
-                    JOptionPane.showMessageDialog(NewCustomerGUI.this, "Payment info required.");
-                } else if (firstNameField.getText().isEmpty() ||
+                //Check for empty fields
+                if (firstNameField.getText().isEmpty() ||
                         lastNameField.getText().isEmpty() ||
                         addressField.getText().isEmpty() ||
                         cityField.getText().isEmpty() ||
                         zipField.getText().isEmpty() ||
                         phoneField.getText().isEmpty() ||
-                        emailField.getText().isEmpty()){
+                        emailField.getText().isEmpty() ||
+                        cardNameField.getText().isEmpty() ||
+                        cardStreetAddressField.getText().isEmpty() ||
+                        cardCityAddressField.getText().isEmpty() ||
+                        cardStateComboBox.getSelectedItem().toString().isEmpty() ||
+                        cardZIPAddressField.getText().isEmpty() ||
+                        cardNumberField.getText().isEmpty() ||
+                        monthBox.getSelectedItem().toString().isEmpty() ||
+                        yearBox.getSelectedItem().toString().isEmpty() ||
+                        csvField.getText().isEmpty()) {
                     JOptionPane.showMessageDialog(NewCustomerGUI.this, "Please fill out all fields.");
+
                 } else {
-                    CreditCard sendCard = controller.getHoldCard();
 
 
-                    //Create new customer object
+                    //Create new customer ID
                     int newID = getNewID();
+
+                    //Create new credit card object
+                    String nameOnCard = cardNameField.getText();
+                    String cardStreet = cardStreetAddressField.getText();
+                    String cardCity = cardCityAddressField.getText();
+                    String cardState = cardStateComboBox.getSelectedItem().toString();
+                    int cardZIP = Integer.parseInt(cardZIPAddressField.getText());
+                    String cardType = cardTypeComboBox.getSelectedItem().toString();
+                    Long cardNumber = Long.parseLong(cardNumberField.getText());
+
+                    //Save integers from expiration boxes as arraylist
+                    int monthExp = (int) monthBox.getSelectedItem();
+                    int yearExp = (int) yearBox.getSelectedItem();
+
+                    Calendar newCal = Calendar.getInstance();
+                    newCal.clear();
+                    newCal.set(Calendar.MONTH, monthExp);
+                    newCal.set(Calendar.YEAR, yearExp);
+                    Date cardExp = newCal.getTime();
+
+                    int csv = Integer.parseInt(csvField.getText());
+
+                    CreditCard newCard = new CreditCard(newID, cardType, nameOnCard, cardNumber, cardExp, csv,
+                            cardStreet, cardCity, cardState, cardZIP);
+
+                    //create new customer object
                     String firstName = firstNameField.getText();
                     String lastName = lastNameField.getText();
                     String streetAddress = addressField.getText();
@@ -95,22 +153,25 @@ public class NewCustomerGUI extends JFrame {
                     int zipAddress = Integer.parseInt(zipField.getText());
                     String phone = phoneField.getText();
                     String email = emailField.getText();
-                    String creditCard = sendCard.lastFour;
+                    String creditCard = newCard.lastFour;
                     int outBooks = 0;
+                    Double totalCharged = 0.00;
                     Date addDate = new Date();
 
                     Customer newCust = new Customer(newID, firstName, lastName, streetAddress, cityAddress,
-                            stateAddress, zipAddress, phone, email, creditCard, outBooks, addDate);
+                            stateAddress, zipAddress, phone, email, creditCard, outBooks, totalCharged, addDate);
 
-                    //Set customer ID in credit card profile
-                    sendCard.custID = newID;
+                    try {
+                        //Send card and customer to DB
+                        controller.addCustomer(newCust);
+                        controller.addCC(newCard);
+                        JOptionPane.showMessageDialog(NewCustomerGUI.this, "Created new Mybrarian.\nMybrary ID: " + newCust.getCustomerID());
+                    } catch (Exception e1) {
+                        e1.printStackTrace();
+                        JOptionPane.showMessageDialog(NewCustomerGUI.this, "Error creating customer:\n" + e1.toString());
+                    }
 
-                    //Send card and customer to DB
-                    controller.addCC(sendCard);
-                    controller.addCustomer(newCust);
-
-                    //Clear temporary card information and close window
-                    controller.setHoldCard(null);
+                    controller.NewMainMenuGUI();
                     dispose();
                 }
             }
@@ -120,7 +181,6 @@ public class NewCustomerGUI extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 //Clear temporary card information
-                controller.setHoldCard(null);
                 controller.NewMainMenuGUI();
                 dispose();
             }
@@ -143,5 +203,5 @@ public class NewCustomerGUI extends JFrame {
             }
         }
         return newID;
-    } //Generates new 6-digit customer ID based on existing IDs
+    }   //Generates new 6-digit customer ID based on existing IDs
 }

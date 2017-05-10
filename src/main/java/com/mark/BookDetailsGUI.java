@@ -14,12 +14,12 @@ public class BookDetailsGUI extends JFrame {
     private JButton backToBookSearchButton;
     private JButton checkOutInButton;
     private JTextField isbnField;
-    private JTextField genreField;
+    private JTextField categoriesField;
     private JTextField titleField;
     private JTextField authorField;
     private JTextField pagesField;
     private JTextField publisherField;
-    private JTextField yearField;
+    private JTextField dateField;
     private JTextField priceField;
     private JTextField statusField;
     private JTextField customerField;
@@ -40,26 +40,26 @@ public class BookDetailsGUI extends JFrame {
 
 
         //Add data to fields
-        isbnField.setText(String.valueOf(book.isbn));
-        genreField.setText(book.genre);
-        titleField.setText(book.title);
-        authorField.setText(book.author);
-        pagesField.setText(String.valueOf(book.pages));
-        publisherField.setText(book.publisher);
-        yearField.setText(String.valueOf(book.yearPublished));
-        priceField.setText(String.valueOf(book.price));
-        statusField.setText(String.valueOf(book.status));
-        customerField.setText(String.valueOf(book.custID));
+        isbnField.setText(String.valueOf(book.getIsbn()));
+        categoriesField.setText(book.getCategories());
+        titleField.setText(book.getTitle());
+        authorField.setText(book.getAuthor());
+        pagesField.setText(String.valueOf(book.getPages()));
+        publisherField.setText(book.getPublisher());
+        dateField.setText(book.getPubDate());
+        priceField.setText(String.valueOf(book.getPrice()));
+        statusField.setText(String.valueOf(book.getStatus()));
+        customerField.setText(String.valueOf(book.getCustID()));
 
 
         //Remove editing from fields
         isbnField.setEditable(false);
-        genreField.setEditable(false);
+        categoriesField.setEditable(false);
         titleField.setEditable(false);
         authorField.setEditable(false);
         pagesField.setEditable(false);
         publisherField.setEditable(false);
-        yearField.setEditable(false);
+        dateField.setEditable(false);
         priceField.setEditable(false);
         statusField.setEditable(false);
         customerField.setEditable(false);
@@ -67,60 +67,66 @@ public class BookDetailsGUI extends JFrame {
 
         //add Listeners
         addListeners(book);
+
     }
 
     void addListeners(Book book) {
+
         editDetailsButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (editDetailsButton.getText().equals("Edit Details")) {
                     //Turn on editing
                     isbnField.setEditable(true);
-                    genreField.setEditable(true);
+                    categoriesField.setEditable(true);
                     titleField.setEditable(true);
                     authorField.setEditable(true);
                     pagesField.setEditable(true);
                     publisherField.setEditable(true);
-                    yearField.setEditable(true);
+                    dateField.setEditable(true);
                     priceField.setEditable(true);
-                    statusField.setEditable(true);
-                    customerField.setEditable(true);
 
                     //Change button to "Save" for updating record
                     editDetailsButton.setText("Save");
                 } else {
                     //Collect data from fields
-                    book.isbn = Long.parseLong(isbnField.getText());
-                    book.title = titleField.getText();
-                    book.author = authorField.getText();
-                    book.genre = genreField.getText();
-                    book.pages = Integer.parseInt(pagesField.getText());
-                    book.publisher = publisherField.getText();
-                    book.yearPublished = Integer.parseInt(yearField.getText());
-                    book.price = Double.parseDouble(priceField.getText());
-                    book.custID = Integer.parseInt(customerField.getText());
-                    book.status = Boolean.parseBoolean(statusField.getText());
+                    book.setIsbn(isbnField.getText());
+                    book.setTitle(titleField.getText());
+                    book.setAuthor(authorField.getText());
+                    book.setCategories(categoriesField.getText());
+                    book.setPages(Integer.parseInt(pagesField.getText()));
+                    book.setPublisher(publisherField.getText());
+                    book.setPubDate(dateField.getText());
+                    book.setCustID(Integer.parseInt(customerField.getText()));
+                    book.setStatus(statusField.getText());
+                    book.setPrice(Double.parseDouble(priceField.getText()));
 
                     //Update record in DB
                     controller.updateBook(book);
 
                     //Reset fields to non-editable
                     isbnField.setEditable(false);
-                    genreField.setEditable(false);
+                    categoriesField.setEditable(false);
                     titleField.setEditable(false);
                     authorField.setEditable(false);
                     pagesField.setEditable(false);
                     publisherField.setEditable(false);
-                    yearField.setEditable(false);
+                    dateField.setEditable(false);
                     priceField.setEditable(false);
-                    statusField.setEditable(false);
-                    customerField.setEditable(false);
 
                     //Change button to "Edit"
-                    editDetailsButton.setText("Edit");
+                    editDetailsButton.setText("Edit Details");
                 }
             }
         }); //Opens fields for editing, sends to DB on saving
+
+        checkOutInButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                controller.CheckOutGUI(book);
+                dispose();
+            }
+        }); //Opens checkout window, disposes current
 
         backToBookSearchButton.addActionListener(new ActionListener() {
             @Override

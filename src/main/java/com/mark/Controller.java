@@ -15,7 +15,8 @@ public class Controller {
     static AddBookGUI addBookGUI;
     static BookDetailsGUI newBookDetailsGUI;
     static CreditCardGUI creditCardGUI;
-    static CreditCard holdCard;
+    static CheckOutGUI checkOutGUI;
+    static ReportsGUI reportsGUI;
     static final List<String> states = Arrays.asList("MN","AK","AL","AR","AZ","CA","CO","CT","DC","DE","FL","GA",
             "GU","HI", "IA","ID","IL","IN","KS","KY","LA","MA","MD","ME","MH","MI","MN","MO","MS","MT","NC","ND","NE",
             "NH","NJ","NM","NV","NY", "OH","OK","OR","PA","PR","PW","RI","SC","SD","TN","TX","UT","VA","VI","VT","WA",
@@ -33,51 +34,73 @@ public class Controller {
     private void startApp() {
         db = new DB();
         db.createTables();
-        ArrayList<Book> allBookData = db.fetchAllBooks();
-        ArrayList<Customer> allCustData = db.fetchAllCustomers();
+        db.trackOverdue();
         mainMenu = new MainMenu(this);
-
-        //bookSearchGui.setCustListData(allCustData);
 
     }
 
     //Book management
     ArrayList<Book> getAllBooks() { return db.fetchAllBooks(); }
+    ArrayList<Book> getCustBooks(int custID) { return db.fetchCustBooks(custID); }
     void addBook(Book book) { db.addBook(book); }
     void updateBook(Book book) { db.updateBook(book); }
     void deleteBook(Book book) { db.deleteBook(book); }
+    Book getBook(int bookID) { return db.getBook(bookID); }
+
 
     //Customer management
     ArrayList<Customer> getAllCust() { return db.fetchAllCustomers(); }
     void addCustomer(Customer customer) { db.addCustomer(customer); }
-    void updateCustomer(Customer customer) { db.addCustomer(customer); }
-    void deleteCustomer(Customer customer) { db.deleteCustomer(customer); }
+    void updateCustomer(Customer customer) { db.updateCustomer(customer); }
+    void deleteCustomer(int customerID) { db.deleteCustomer(customerID); }
+    Customer getCustomer(int customerID) { return db.getCustomer(customerID); }
 
     //Card management
     void addCC(CreditCard cc) { db.addCard(cc); }
     void updateCC(CreditCard cc) { db.updateCard(cc); }
-    void deleteCC(CreditCard cc) { db.deleteCard(cc); }
+    void deleteCC(int customerID) { db.deleteCard(customerID); }
+    CreditCard getCard(int custID) { return db.getCreditCard(custID);  }
+    void chargeCard(int bookID, int custID) { db.chargeCard(bookID, custID); }
 
-    //Temporarily holds credit card information to pass to new customer GUI
-    public static void setHoldCard(CreditCard holdCard) { Controller.holdCard = holdCard; }
-    public static CreditCard getHoldCard() { return holdCard; }
+    //Reports management
+    ArrayList<SoldBook> fetchAllSoldBooks() { return db.fetchAllSoldBooks(); }
 
 
+    public static boolean isValidCreditCard(String cc) {
+        int total = 0;
 
-    //API
-    void setISBNForAPI(String isbn){
-        this.isbn = isbn;
+        //Create array of integers based on cc
+        int[] numArray = new int[cc.length()];
+
+        //Loop through cc
+        for (int x = 0; x < cc.length(); x++) {
+            //Double even elements & 0 element
+            if (x == 0 || x % 2 == 0) {
+                numArray[x] = Character.getNumericValue(cc.charAt(x)) * 2;
+            }
+            else
+                numArray[x] = Character.getNumericValue(cc.charAt(x));
+
+            //Value of integers 10 through 19 added together is equivalent to int - 9
+            if (numArray[x] >= 10){
+                numArray[x] -= 9;
+            }
+
+            //Accumulate total
+            total += numArray[x];
         }
-    protected static String getISBNForAPI() {
-        return isbn;
-    }
+
+        if (total % 10 == 0){
+            return true;}
+        else
+            return false;
+    } //Validates credit card number
 
 
     //New window creation
     void NewBookSearchGUI() {
         bookSearchGUI = new BookSearchGUI(this);
-        bookSearchGUI.setBookListData(getAllBooks());
-    }   //New Book Search window
+        }   //New Book Search window
 
     void NewMainMenuGUI() {
         mainMenu = new MainMenu(this);
@@ -95,6 +118,10 @@ public class Controller {
 
     void BookDetailsGUI(Book book) { newBookDetailsGUI = new BookDetailsGUI(this, book);}
 
-    void CreditCardGUI(String sendFName, String sendLName, String sendStreet, String sendCity, String sendState, String sendZIP) { creditCardGUI = new CreditCardGUI(this, sendFName, sendLName, sendStreet, sendCity, sendState, sendZIP);}
+    void CreditCardGUI(CreditCard cc) { creditCardGUI = new CreditCardGUI(this, cc);}
+
+    void CheckOutGUI(Book book) { checkOutGUI = new CheckOutGUI(this, book); }
+
+    void ReportsGUI() { reportsGUI = new ReportsGUI(this); }
 
 }

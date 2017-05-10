@@ -10,8 +10,7 @@ public class MainMenu extends JFrame {
     private JButton searchCustomersButton;
     private JButton createNewCustomerButton;
     private JButton addBookButton;
-    private JTextField searchField;
-    private JButton searchButton;
+    private JButton reportsButton;
 
     private Controller controller;
 
@@ -67,13 +66,14 @@ public class MainMenu extends JFrame {
             }
         });        //Add new book button
 
-        //Quick search button
-        searchButton.addActionListener(new ActionListener() {
+        reportsButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                controller.ReportsGUI();
+                dispose();
 
             }
-        });
+        });         //Opens reports window
 
     }
 

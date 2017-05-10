@@ -1,9 +1,9 @@
 package com.mark;//Class codes the main library BookSearchGUI
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.*;
 import java.util.ArrayList;
+import java.util.Vector;
 
 public class BookSearchGUI extends JFrame {
 
@@ -11,26 +11,22 @@ public class BookSearchGUI extends JFrame {
     private JButton customerDetailsButton;
     private JButton searchButton;
     private JButton checkOutInButton;
-    private JTextField isbnField;
-    private JLabel isbnLabel;
-    private JTextField titleField;
-    private JTextField authorField;
     private JTextField dueDate;
     private JTextField outDate;
     private JTextField customerIDField;
     private JTextField searchField;
     private JComboBox searchBar;
     private JTextField statusField;
-    private JTextField genreField;
     private JButton bookDetailsButton;
     private JButton clearButton;
+    private JButton mainMenuButton;
 
     private Controller controller;
 
     //Configure list model
-    private JList<Book> bookList;
-    private JButton mainMenuButton;
-    private DefaultListModel<Book> allBooksModel;
+    private JTable booksTable;
+    private BooksTableModel booksTableModel;
+    private Vector<Book> books;
 
 
     BookSearchGUI(Controller controller) {
@@ -39,12 +35,24 @@ public class BookSearchGUI extends JFrame {
         //create reference to controller
         this.controller = controller;
 
-        //Configure list model
-        allBooksModel = new DefaultListModel<>();
-        bookList.setModel(allBooksModel);
+        //Configure table model
+        books = new Vector<>(controller.getAllBooks());
+        booksTableModel = new BooksTableModel(books);
+        booksTable.setModel(booksTableModel);
 
         //Add selections to search bar
-        configureSearchBar();
+        searchBar.addItem("ISBN");
+        searchBar.addItem("Author");
+        searchBar.addItem("Title");
+        searchBar.addItem("Categories");
+
+
+        //Lock fields
+        statusField.setEditable(false);
+        customerIDField.setEditable(false);
+        outDate.setEditable(false);
+        dueDate.setEditable(false);
+
 
         //add Listeners
         addListeners();
@@ -57,22 +65,20 @@ public class BookSearchGUI extends JFrame {
     }
 
 
-
     //Add Listeners
     private void addListeners() {
-        //Search Button
         searchButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 ArrayList<Book> currentBooks = controller.getAllBooks();
-                ArrayList<Book> search = new ArrayList<>();
+                books = new Vector<>();
 
-                if (searchBar.toString().equals("ISBN") ) {
+                if (searchBar.getSelectedItem().toString().equals("ISBN") ) {
                     try{
                         int number = Integer.parseInt(searchField.getText());
                         for (Book b: currentBooks) {
-                            if (b.isbn == number) {
-                                search.add(b);
+                            if (b.isbn.contains(searchField.getText())) {
+                                books.add(b);
                             }
                         }
                     } catch (NumberFormatException ne) {
@@ -80,51 +86,52 @@ public class BookSearchGUI extends JFrame {
                         return;
                     }
 
-                } else if (searchBar.toString().equals("Author") ) {
+                } else if (searchBar.getSelectedItem().toString().equals("Author") ) {
                     String authorSearch = searchField.getText();
                     for (Book b: currentBooks) {
-                        if (b.author.contains(authorSearch)) {
-                            search.add(b);
+                        if (b.author.toLowerCase().contains(authorSearch.toLowerCase())) {
+                            books.add(b);
                         }
                     }
 
-                } else if (searchBar.toString().equals("Title") ) {
+                } else if (searchBar.getSelectedItem().toString().equals("Title") ) {
                     String titleSearch = searchField.getText();
                     for (Book b: currentBooks) {
-                        if (b.author.contains(titleSearch)) {
-                            search.add(b);
+                        if (b.title.toLowerCase().contains(titleSearch.toLowerCase())) {
+                            books.add(b);
                         }
                     }
 
-                } else if (searchBar.toString().equals("Genre") ) {
-                    String genreSearch = searchField.getText();
-                    for (Book b: currentBooks) {
-                        if (b.author.contains(genreSearch)) {
-                            search.add(b);
+                } else if (searchBar.getSelectedItem().toString().equals("Categories") ) {
+                    String categoriesSearch = searchField.getText();
+                    for (Book b : currentBooks) {
+                        if (b.categories.toLowerCase().contains(categoriesSearch.toLowerCase())) {
+                            books.add(b);
                         }
                     }
-                } else {
-                    JOptionPane.showMessageDialog(BookSearchGUI.this, "Please select a search term.");
-                    return;
                 }
-                setBookListData(search);
+
+                if (books.size() > 0) {
+                    booksTableModel = new BooksTableModel(books);
+                    booksTable.setModel(booksTableModel);
+                } else {
+                    JOptionPane.showMessageDialog(BookSearchGUI.this, "No results.");
+                }
+
             }
+
         }); //Searches database by combo box selection and search term
 
-        //Clear Button
         clearButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 //Reset inventory list
-                ArrayList<Book> currentBooks = controller.getAllBooks();
-                setBookListData(currentBooks);
+                books = new Vector<>(controller.getAllBooks());
+                booksTableModel = new BooksTableModel(books);
+                booksTable.setModel(booksTableModel);
 
                 //Clear all fields
                 searchField.setText("");
-                isbnField.setText("");
-                titleField.setText("");
-                authorField.setText("");
-                genreField.setText("");
                 statusField.setText("");
                 customerIDField.setText("");
                 outDate.setText("");
@@ -132,35 +139,46 @@ public class BookSearchGUI extends JFrame {
             }
         });  //Resets JList and clears all text fields
 
-        //Check Out/In Button
         checkOutInButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-
-                //TODO: Create Checkout Window
-
+                int column = 0;
+                int row = booksTable.getSelectedRow();
+                int toEdit = Integer.parseInt(booksTable.getModel().getValueAt(row, column).toString());
+                Book book = controller.getBook(toEdit);
+                controller.CheckOutGUI(book);
+                dispose();
             }
-        });
+        });        //Opens Checkout Window, disposes current.
 
-        //Customer Details Button
         customerDetailsButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
 
-                //TODO: Create Customer Details Window
-
+                if (Integer.parseInt(customerIDField.getText()) == 0) {
+                    JOptionPane.showMessageDialog(BookSearchGUI.this, "No customer data associated with this book.");
+                } else {
+                    int id = Integer.parseInt(customerIDField.getText());
+                    controller.NewCustomerDetailsGUI(controller.getCustomer(id));
+                    dispose();
+                }
             }
-        });
+        }); //Opens Customer Details window, disposes current. Sends book's associated Cust.Id to new GUI
 
         bookDetailsButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (!bookList.isSelectionEmpty()) {
-                    Book selection = bookList.getSelectedValue();
-                    controller.BookDetailsGUI(selection);
-                    dispose();
-                } else {
-                    JOptionPane.showMessageDialog(BookSearchGUI.this, "No book selected.");
+                int column = 0;
+                int row = booksTable.getSelectedRow();
+                int selected = Integer.parseInt(booksTable.getModel().getValueAt(row, column).toString());
+
+                //Use bookID
+                ArrayList<Book> bookList = controller.getAllBooks();
+                for (Book b: bookList) {
+                    if (b.getMybID() == selected) {
+                        controller.BookDetailsGUI(b);
+                        dispose();
+                    }
                 }
             }
         }); //Opens book details window, disposes current. Sends current JList selection to new GUI
@@ -173,35 +191,23 @@ public class BookSearchGUI extends JFrame {
             }
         }); //Opens main menu window, disposes current.
 
+        booksTable.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                super.mouseReleased(e);
+                int x = booksTable.getSelectedRow();
+                Book selectedBook = books.get(x);
+                statusField.setText(selectedBook.getStatus());
+                customerIDField.setText(String.valueOf(selectedBook.getCustID()));
+                if (selectedBook.getCheckedOut() != null) {
+                    outDate.setText(selectedBook.getCheckedOut().toString());
+                }
+                if (selectedBook.getDueDate() != null) {
+                    dueDate.setText(selectedBook.getDueDate().toString());
+                }
+            }
+        });
+
     }
 
-
-    void configureSearchBar() {
-        searchBar.addItem("ISBN");
-        searchBar.addItem("Author");
-        searchBar.addItem("Title");
-        searchBar.addItem("Genre");
-    }
-
-
-
-    void setBookListData(ArrayList<Book> data) {
-        //Display data in allData
-        allBooksModel.clear();
-        for (Book book : data) {
-            allBooksModel.addElement(book);
-        }
-    }
-
-
-    /*
-    TODO: Add this to Customer Search window
-    void setCustListData(ArrayList<Customer> data) {
-        //Display data in allData
-        allCustModel.clear();
-        for (Customer cust : data) {
-            allCustModel.addElement(cust);
-        }
-    }
-    */
 }

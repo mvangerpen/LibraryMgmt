@@ -1,16 +1,21 @@
 package com.mark;
 
+import com.sun.xml.internal.fastinfoset.util.CharArray;
+
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.time.LocalDateTime;
+import java.util.*;
 
-import static com.mark.Controller.newCustomerGUI;
+import static java.util.Calendar.MONTH;
+import static javax.swing.UIManager.get;
 
 
-public class CreditCardGUI extends JFrame{
+public class CreditCardGUI extends JFrame {
     private JComboBox cardTypeComboBox;
     private JTextField cardNumberField;
-    private JTextField cardFNameField;
+    private JTextField nameOnCardField;
     private JTextField csvField;
     private JFormattedTextField expirationField;
     private JTextField addressField;
@@ -21,13 +26,14 @@ public class CreditCardGUI extends JFrame{
     private JButton cancelButton;
     private JPanel rootPanel;
     private JCheckBox sameAsCustomerAddressCheckBox;
+    private JComboBox expMonthBox;
+    private JComboBox expYearBox;
     private JTextField cardLNameField;
 
     private Controller controller;
     private CreditCard newCard;     //Contains class-specific variables
 
-    public CreditCardGUI(Controller controller, String sendFName, String sendLName, String sendStreet,
-                         String sendCity, String sendState, String sendZIP) {
+    public CreditCardGUI(Controller controller, CreditCard oldCard) {
 
         super("Mybrarian: Add Payment");
 
@@ -35,7 +41,7 @@ public class CreditCardGUI extends JFrame{
         this.controller = controller;
 
         //add Listeners
-        addListeners(sendStreet, sendCity, sendState, sendZIP);
+        addListeners(oldCard);
 
         //set up JFrame
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -43,48 +49,72 @@ public class CreditCardGUI extends JFrame{
         pack();
         setVisible(true);
 
-        //Add Name from previous
-        cardFNameField.setText(sendFName);
-        cardLNameField.setText(sendLName);
-
         //Configure combo box options
+        //States
         for (String x : controller.states) {
             stateComboBox.addItem(x);
         }
 
+        //Card Type box
         cardTypeComboBox.addItem("VISA");
         cardTypeComboBox.addItem("MC");
         cardTypeComboBox.addItem("DISC");
         cardTypeComboBox.addItem("AMEX");
 
+        //Expiration boxes - tracks five years out
+        LocalDateTime now = LocalDateTime.now();
+        int thisYear = now.getYear();
+        for (int x = 1; x < 13; x++) {
+            expMonthBox.addItem(x);
+        }
+        for (int x = thisYear; x < thisYear + 5; x++) {
+            expYearBox.addItem(x);
+        }
+
+        addInfo(oldCard);
+
     }   //Builds new credit card GUI
 
 
-    void addListeners(String sendStreet, String sendCity, String sendState, String sendZIP) {
+    void addListeners(CreditCard oldCard) {
+
         sameAsCustomerAddressCheckBox.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                addressField.setText(sendStreet);
-                cityField.setText(sendCity);
-                stateComboBox.setSelectedItem(sendState);
-                zipField.setText(sendZIP);
+                //Get customer info
+                int custID = oldCard.getCustID();
+
+                Customer storedCust = controller.getCustomer(custID);
+
+                addressField.setText(storedCust.getStreetAddress());
+                cityField.setText(storedCust.getCityAddress());
+                stateComboBox.setSelectedItem(storedCust.getStateAddress());
+                zipField.setText(String.valueOf(storedCust.getZipAddress()));
             }
-        }); //Fills relevant fields with data from customer GUI
+        });
 
         addPaymentButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String number = cardNumberField.getText();
-                if (!isValidCreditCard(number)) {
+                if (!controller.isValidCreditCard(number)) {
                     JOptionPane.showMessageDialog(CreditCardGUI.this, "Invalid card number. Check number and try again.");
                 } else {
                     //Collect card values
-                    int custID = 0;
+                    int custID = oldCard.getCustID();
                     String cardType = (String) cardTypeComboBox.getSelectedItem();
-                    String fname = cardFNameField.getText();
-                    String lname = cardLNameField.getText();
+                    String name = nameOnCardField.getText();
                     Long num = Long.parseLong(cardNumberField.getText());
-                    int exp = Integer.parseInt(expirationField.getText());
+
+                    int monthExp = (int) expMonthBox.getSelectedItem();
+                    int yearExp = (int) expYearBox.getSelectedItem();
+
+                    Calendar newCal = Calendar.getInstance();
+                    newCal.clear();
+                    newCal.set(Calendar.MONTH, monthExp);
+                    newCal.set(Calendar.YEAR, yearExp);
+                    Date exp = newCal.getTime();
+
                     int csv = Integer.parseInt(csvField.getText());
                     String add = addressField.getText();
                     String city = cityField.getText();
@@ -92,17 +122,21 @@ public class CreditCardGUI extends JFrame{
                     int zip = Integer.parseInt(zipField.getText());
 
                     //Create new card
-                    newCard = new CreditCard(custID, cardType, fname, lname, num, exp, csv, add, city, state, zip);
+                    newCard = new CreditCard(custID, cardType, name, num, exp, csv, add, city, state, zip);
 
-                    //Hold card in controller until Customer object is created
-                    controller.setHoldCard(newCard);
+                    //Update card in DB
+                    try {
+                        controller.updateCC(newCard);
+                        JOptionPane.showMessageDialog(CreditCardGUI.this, "Card updated.");
 
-                    //Update fields in open Customer window
-                    newCustomerGUI.cardTypeField.setText(cardType);
-                    newCustomerGUI.cardNumberField.setText(newCard.masked);
+                        //Close window
+                        controller.NewCustomerDetailsGUI(controller.getCustomer(custID));
+                        dispose();
 
-                    //Close window
-                    dispose();
+                    } catch (Exception e1) {
+                        e1.printStackTrace();
+                        JOptionPane.showMessageDialog(CreditCardGUI.this, "Error updating card.");
+                    }
 
                 }
             }
@@ -112,39 +146,31 @@ public class CreditCardGUI extends JFrame{
             @Override
             public void actionPerformed(ActionEvent e) {
                 //Close window
+                controller.NewMainMenuGUI();
                 dispose();
 
             }
         }); //Disposes window and all field information.
     }
 
-    public static boolean isValidCreditCard(String cc) {
-        int total = 0;
 
-        //Create array of integers based on cc
-        int[] numArray = new int[cc.length()];
+    void addInfo(CreditCard card) {
+        nameOnCardField.setText(card.getNameOnCard());
+        cardTypeComboBox.setSelectedItem(card.getType());
+        cardNumberField.setText(String.valueOf(card.getNumber()));
 
-        //Loop through cc
-        for (int x = 0; x < cc.length(); x++) {
-            //Double even elements & 0 element
-            if (x == 0 || x % 2 == 0) {
-                numArray[x] = Character.getNumericValue(cc.charAt(x)) * 2;
-            }
-            else
-                numArray[x] = Character.getNumericValue(cc.charAt(x));
+        Date expDate = card.getExpiration();
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(expDate);
+        expMonthBox.setSelectedItem(cal.get(Calendar.MONTH));
+        expYearBox.setSelectedItem(cal.get(Calendar.YEAR));
 
-            //Value of integers 10 through 19 added together is equivalent to int - 9
-            if (numArray[x] >= 10){
-                numArray[x] -= 9;
-            }
+        csvField.setText(String.valueOf(card.getCsv()));
+        addressField.setText(card.getCardAddress());
+        cityField.setText(card.getCardCity());
+        stateComboBox.setSelectedItem(card.getCardState());
+        zipField.setText(String.valueOf(card.cardZIP));
+    }
 
-            //Accumulate total
-            total += numArray[x];
-        }
 
-        if (total % 10 == 0){
-            return true;}
-        else
-            return false;
-    } //Validates credit card number
 }

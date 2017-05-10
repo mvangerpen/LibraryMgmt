@@ -1,28 +1,28 @@
 package com.mark;
 
 import javax.swing.*;
-import javax.swing.table.AbstractTableModel;
-import javax.swing.table.DefaultTableColumnModel;
-import javax.swing.table.DefaultTableModel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.Vector;
 
 public class CustomerSearchGUI extends JFrame {
     private JPanel mainPanel;
     private JComboBox searchByComboBox;
     private JTextField searchField;
     private JButton searchButton;
-    private JButton editDetailsButton;
+    private JButton customerDetailsButton;
     private JButton mainMenuButton;
     private JScrollPane resultsPane;
+    private JTable custTable;
+    private JButton clearSearchButton;
 
 
-    private JTable resultsTable;
-    private DefaultTableModel tableModel;
-    private DefaultTableColumnModel columnModel;
+    private CustTableModel custTableModel;
+    private Vector<Customer> customers;
 
     private Controller controller;
+
 
     CustomerSearchGUI(Controller controller) {
         super("Mybrarian: Search Customer");
@@ -30,9 +30,17 @@ public class CustomerSearchGUI extends JFrame {
         //create reference to controller
         this.controller = controller;
 
-        resultsTable = fillTable();
+        customers = new Vector<>(controller.getAllCust());
+        custTableModel = new CustTableModel(customers);
+        custTable.setModel(custTableModel);
 
-        //add Listeners
+        //Configure search combo box
+        searchByComboBox.addItem("Customer ID");
+        searchByComboBox.addItem("First Name");
+        searchByComboBox.addItem("Last Name");
+        searchByComboBox.addItem("Phone Number");
+        searchByComboBox.addItem("Email");
+
         addListeners();
 
         //set up JFrame
@@ -40,66 +48,94 @@ public class CustomerSearchGUI extends JFrame {
         setContentPane(mainPanel);
         pack();
         setVisible(true);
-
-    }
-
-    private JTable fillTable() {
-        resultsTable = new JTable(new TableModel());
-        return resultsTable;
-        }
-
-    class TableModel extends AbstractTableModel {
-
-        private String[] columnNames = {"Customer ID", "First Name", "Last Name", "Phone", "Amt Checked Out"};
-
-        private Object[] truncated = truncateCust();
-
-        private Object[][] rowData = {truncated};
-
-
-        public int getColumnCount() {
-            return columnNames.length;
-        }
-
-        public int getRowCount() { return rowData.length; }
-
-        public String getColumnName(int col) {
-            return columnNames[col];
-        }
-
-        public Object[] truncateCust() {
-            ArrayList<Customer> custList = controller.getAllCust();
-            Object[] shortened = new Object[custList.size()];
-            String[] data = new String[5];
-
-            for (int x =0; x < custList.size(); x++) {
-                //Build truncated individual objects
-                data[0] = String.valueOf(custList.get(x).customerID);
-                data[1] = (custList.get(x).firstName);
-                data[2] = custList.get(x).lastName;
-                data[3] = custList.get(x).phone;
-                data[4] = String.valueOf(custList.get(x).checkedOut);
-
-                //put them in a List
-                shortened[x] = data;
-            }
-
-            return shortened;
-        }
-
-        public Object getValueAt(int row, int column) {
-            return rowData[row];
-        }
     }
 
     void addListeners() {
 
-        editDetailsButton.addActionListener(new ActionListener() {
+        searchButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                //Pull list of all customers
+                ArrayList<Customer> allCustomers = controller.getAllCust();
+
+                //Reestablish vector list
+                customers = new Vector<>();
+
+                if (searchByComboBox.getSelectedItem().toString().equalsIgnoreCase("Customer ID")) {
+                    try {
+                        int search = Integer.parseInt(searchField.getText());
+
+                        for (Customer c : allCustomers) {
+                            if (String.valueOf(c.customerID).contains(String.valueOf(search))) {
+                                customers.add(c);
+                            }
+                        }
+                    } catch (NumberFormatException ne) {
+                        JOptionPane.showMessageDialog(CustomerSearchGUI.this, "Please use numbers for ID search.");
+                        return;
+                    }
+                } else if (searchByComboBox.getSelectedItem().toString().equalsIgnoreCase("First Name")) {
+
+                    String search = searchField.getText();
+                    for (Customer c : allCustomers) {
+                        if (c.getFirstName().toLowerCase().contains(search.toLowerCase())) {
+                            customers.add(c);
+                        }
+                    }
+                } else if (searchByComboBox.getSelectedItem().toString().equalsIgnoreCase("Last Name")) {
+
+                    String search = searchField.getText();
+                    for (Customer c : allCustomers) {
+                        if (c.getLastName().toLowerCase().contains(search.toLowerCase())) {
+                            customers.add(c);
+                        }
+                    }
+                } else if (searchByComboBox.getSelectedItem().toString().equalsIgnoreCase("Phone Number")) {
+
+                    String search = searchField.getText();
+                    for (Customer c : allCustomers) {
+                        if (c.getPhone().toLowerCase().contains(search.toLowerCase())) {
+                            customers.add(c);
+                        }
+                    }
+                } else if (searchByComboBox.getSelectedItem().toString().equalsIgnoreCase("Email")) {
+
+                    String search = searchField.getText();
+                    for (Customer c : allCustomers) {
+                        if (c.getEmail().toLowerCase().contains(search.toLowerCase())) {
+                            customers.add(c);
+                        }
+                    }
+                }
+
+                if (customers.size() > 0) {
+                    custTableModel = new CustTableModel(customers);
+                    custTable.setModel(custTableModel);
+                } else {
+                    JOptionPane.showMessageDialog(CustomerSearchGUI.this, "No results.");
+                }
+            }
+        }); //Searches Customers list by search term and refreshes table
+
+        clearSearchButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                //Reset ComboBox
+                searchByComboBox.setSelectedItem("Customer ID");
+                searchField.setText("");
+
+                customers = new Vector<>(controller.getAllCust());
+                custTableModel = new CustTableModel(customers);
+                custTable.setModel(custTableModel);
+            }
+        });
+
+        customerDetailsButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 int column = 0;
-                int row = resultsTable.getSelectedRow();
-                int toEdit = Integer.parseInt(resultsTable.getModel().getValueAt(row, column).toString());
+                int row = custTable.getSelectedRow();
+                int toEdit = Integer.parseInt(custTable.getModel().getValueAt(row, column).toString());
 
                 //Use custID
                 ArrayList<Customer> custList = controller.getAllCust();
@@ -112,7 +148,6 @@ public class CustomerSearchGUI extends JFrame {
                 }
 
                 controller.NewCustomerDetailsGUI(toUse);
-
                 dispose();
             }
         }); //Opens new window for Editing customers

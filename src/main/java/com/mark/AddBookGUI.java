@@ -3,15 +3,19 @@ package com.mark;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.Random;
+
+import static jdk.nashorn.internal.objects.NativeMath.round;
 
 public class AddBookGUI extends JFrame {
     private JTextField authorField;
     private JTextField titleField;
-    private JTextField genreField;
+    private JTextField categoriesField;
     private JTextField isbnField;
     private JTextField pagesField;
     private JTextField publisherField;
-    private JTextField yearPublishedField;
+    private JTextField datePublishedField;
     private JTextField priceField;
     private JButton addBookButton;
     private JButton cancelButton;
@@ -44,8 +48,7 @@ public class AddBookGUI extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    controller.setISBNForAPI(isbnField.getText());
-                    //new BooksRequest();
+                    BooksRequest.getByISBN(isbnField.getText(),AddBookGUI.this);
                 } catch (Exception e1) {
                     e1.printStackTrace();
                 }
@@ -55,6 +58,8 @@ public class AddBookGUI extends JFrame {
         addBookButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                //Establish accumulator for number of new books added
+                int numNew = 0;
 
                 try {
                     copiesSpinner.commitEdit();
@@ -62,64 +67,71 @@ public class AddBookGUI extends JFrame {
                     JOptionPane.showMessageDialog(AddBookGUI.this, "Error in Copies field.");
                 } //Commits edits to copies spinner if manually entered.
 
-                try {
-                    Long nISBN = Long.parseLong(isbnField.getText());
-                    String nTitle = titleField.getText();
-                    String nAuthor = authorField.getText();
-                    String nGenre = genreField.getText();
-                    int nPages = Integer.parseInt(pagesField.getText());
-                    String nPublisher = publisherField.getText();
-                    int nYear = Integer.parseInt(yearPublishedField.getText());
-                    double nPrice = Double.parseDouble(priceField.getText());
-                    int nCopies = (Integer) copiesSpinner.getValue();
-                    Boolean nInStock = true;
-                    int nID = 010101;
+                if (isbnField.getText().isEmpty() ||
+                        titleField.getText().isEmpty() ||
+                        authorField.getText().isEmpty() ||
+                        categoriesField.getText().isEmpty() ||
+                        pagesField.getText().isEmpty() ||
+                        publisherField.getText().isEmpty() ||
+                        datePublishedField.getText().isEmpty() ||
+                        priceField.getText().isEmpty() ||
+                        (int) copiesSpinner.getValue() == 0) {
+                    JOptionPane.showMessageDialog(AddBookGUI.this, "Please fill out all fields.");
 
-                    if (isbnField.getText().isEmpty() ||
-                            titleField.getText().isEmpty() ||
-                            authorField.getText().isEmpty() ||
-                            genreField.getText().isEmpty() ||
-                            pagesField.getText().isEmpty() ||
-                            publisherField.getText().isEmpty() ||
-                            yearPublishedField.getText().isEmpty() ||
-                            priceField.getText().isEmpty() ||
-                            nCopies == 0) {
-                        JOptionPane.showMessageDialog(AddBookGUI.this, "Please fill out all fields.");
-                    } else {
-                        //Create book object
-                        Book newBook = new Book(nISBN, nTitle, nAuthor, nGenre, nPages, nPublisher, nYear, nPrice, nCopies, nInStock,
-                                nID, null, null);
-                        System.out.println(newBook.toString());
-                        try {
-                            //Send to database
-                            controller.addBook(newBook);
-                        } catch (Exception e1 ){
-                            JOptionPane.showMessageDialog(AddBookGUI.this, "Error updating database.");
-                            e1.printStackTrace();
+                } else {
+
+                    try {
+                        for (int x = 0; x < (int) copiesSpinner.getValue(); x++) {
+                            Book newBook = null;
+
+                            int nLibID = getNewID();
+                            String nISBN = isbnField.getText();
+                            String nTitle = titleField.getText();
+                            String nAuthor = authorField.getText();
+                            String nCategories = categoriesField.getText();
+                            int nPages = Integer.parseInt(pagesField.getText());
+                            String nPublisher = publisherField.getText();
+                            String nPubDate = datePublishedField.getText();
+                            String nInStock = "IN";
+                            int nID = 0;
+                            double nPrice = setPrice(nPages);
+                            double nCharged = 0.00;
+
+                            //Create book object
+                            newBook = new Book(nLibID, nISBN, nTitle, nAuthor, nCategories, nPages, nPublisher, nPubDate, nInStock,
+                                    nID, null, null, nPrice, nCharged);
+
+                            System.out.println(newBook.toString());
+                            numNew++;
+
+                            try {
+                                //Send to database
+                                controller.addBook(newBook);
+                            } catch (Exception e1) {
+                                JOptionPane.showMessageDialog(AddBookGUI.this, "Error updating database.");
+                                e1.printStackTrace();
+                            }
                         }
 
-                        //Confirm send
-                        JOptionPane.showMessageDialog(AddBookGUI.this, "Record added.");
-
-                        //Clear fields for next entry
-                        isbnField.setText("");
-                        titleField.setText("");
-                        authorField.setText("");
-                        genreField.setText("");
-                        pagesField.setText("");
-                        publisherField.setText("");
-                        yearPublishedField.setText("");
-                        priceField.setText("");
-                        copiesSpinner.setValue(0);
+                    } catch (NumberFormatException nfe) {
+                        JOptionPane.showMessageDialog(AddBookGUI.this, "Please use numbers for ISBN field.");
+                        System.out.println();
                     }
 
-                } catch (NumberFormatException nfe) {
-                    JOptionPane.showMessageDialog(AddBookGUI.this, "Please use numbers for ISBN field.");
-                    System.out.println();
-                } //Gathers field entries and sends to Book object
+                    //Confirm send
+                    JOptionPane.showMessageDialog(AddBookGUI.this, "Added " + numNew + " new record(s).");
 
-
-
+                    //Clear fields for next entry
+                    isbnField.setText("");
+                    titleField.setText("");
+                    authorField.setText("");
+                    categoriesField.setText("");
+                    pagesField.setText("");
+                    publisherField.setText("");
+                    datePublishedField.setText("");
+                    priceField.setText("");
+                    copiesSpinner.setValue(0);
+                }
             }
         }); // Collects field entries and sends book object to database
 
@@ -132,4 +144,43 @@ public class AddBookGUI extends JFrame {
             }
         }); //Opens main menu, disposes window
     }
+
+    protected void responseComplete(Book response) {
+
+        isbnField.setText(String.valueOf(response.getIsbn()));
+        titleField.setText(response.getTitle());
+        authorField.setText(response.getAuthor());
+        categoriesField.setText(response.getCategories());
+        pagesField.setText(String.valueOf(response.getPages()));
+        publisherField.setText(response.getPublisher());
+        datePublishedField.setText(response.getPubDate());
+        priceField.setText(String.valueOf(setPrice(response.getPages())));
+
+    }
+
+    private Double setPrice(int pages){
+
+        Double price = pages * .05;
+        Double rounded = (double) Math.round(price * 100)/100;
+        return rounded;
+
+    }
+
+    private int getNewID() {
+
+        //Create a new customer ID
+        ArrayList<Book> books = new ArrayList<>(controller.getAllBooks());
+
+        Random rand = new Random();
+        int newID = rand.nextInt(89999) + 10000;
+
+        //Check integer against existing customers.
+        for (Book b : books) {
+            if (newID == b.getMybID()) {
+                getNewID();
+            }
+        }
+        return newID;
+    }   //Generates new 5-digit ID based on existing IDs
+
 }
