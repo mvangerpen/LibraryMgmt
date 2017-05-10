@@ -6,13 +6,14 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Vector;
 
+@SuppressWarnings("unchecked")
 public class ReportsGUI extends JFrame {
     private JPanel mainPanel;
     private JComboBox reportOptionsBox;
     private JButton runButton;
     private JButton detailsButton;
     private JButton backButton;
-    private Controller controller;
+    private final Controller controller;
 
     //Configure list model
     private JTable booksTable;
@@ -23,8 +24,8 @@ public class ReportsGUI extends JFrame {
     private BooksTableModel booksTableModel;
     private Vector<Book> books;
 
-    ArrayList<Book> allBooks;
-    ArrayList<Book> booksReport;
+    private final ArrayList<Book> allBooks;
+    private final ArrayList<Book> booksReport;
 
     ReportsGUI(Controller controller) {
         super("MyReports");

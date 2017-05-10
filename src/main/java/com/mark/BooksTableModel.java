@@ -5,11 +5,11 @@ import java.util.Vector;
 
 import com.mark.Book;
 
-public class BooksTableModel extends AbstractTableModel {
+class BooksTableModel extends AbstractTableModel {
 
-    private Vector<Book> booksList;
+    private final Vector<Book> booksList;
 
-    private String[] colNames = { "BookID", "Title", "Author", "ISBN", "Status"};
+    private final String[] colNames = { "BookID", "Title", "Author", "ISBN", "Status"};
 
     BooksTableModel(Vector<Book> books) {
         booksList = books;

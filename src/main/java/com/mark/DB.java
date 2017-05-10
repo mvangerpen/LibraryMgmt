@@ -9,7 +9,7 @@ import java.sql.Date;
 import java.util.*;
 
 
-public class DB {
+class DB {
 
     private static final String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";
     private static final String DB_CONNECTION_URL = "jdbc:mysql://localhost:3306/library";
@@ -642,17 +642,24 @@ public class DB {
                 if (daysBtwn >= -14 && daysBtwn < 0) {
                     b.setCharged(daysBtwn * OverdueRate);
                     updateBook(b);
-                    builder.append(b.getMybID() + " " + b.getTitle() + "\nCust: " + b.getCustID() + "\n\n");
+                    builder.append(b.getMybID()).append(" ").append(b.getTitle()).append("\nCust: ").append(b.getCustID()).append("\n\n");
                 } else if (daysBtwn < -14) {
-                    deleted.append(b.getMybID() + " " + b.getTitle() + "\nTo Cust: " + b.getCustID() + "\n\n");
+                    deleted.append(b.getMybID()).append(" ").append(b.getTitle()).append("\nTo Cust: ").append(b.getCustID()).append("\n\n");
                     deleteBook(b);
                 }
 
             }
         }
 
-        JOptionPane.showMessageDialog(Controller.mainMenu,"Updated overdue charges:\n" + builder.toString());
-        JOptionPane.showMessageDialog(Controller.mainMenu, "Books sold:\n" + deleted.toString());
+        if (!builder.toString().equals("")) {
+            JOptionPane.showMessageDialog(Controller.mainMenu,"Updated overdue charges:\n" + builder.toString());
+        }
+        if (!deleted.toString().equals("")) {
+            JOptionPane.showMessageDialog(Controller.mainMenu, "Books sold:\n" + deleted.toString());
+        }
+        if (builder.toString().equals("") && deleted.toString().equals("")) {
+            JOptionPane.showMessageDialog(Controller.mainMenu, "Checkout inspection complete. No overdue charges processed.");
+        }
 
     }       // Updates all overdue fees. Updates only the books that are overdue.
 

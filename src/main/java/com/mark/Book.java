@@ -2,8 +2,6 @@ package com.mark;//Class contains the program's book object class
 
 import org.joda.time.LocalDate;
 
-import java.util.Date;
-
 public class Book {
 
     //Establish variables to be held by object
@@ -12,15 +10,15 @@ public class Book {
     String title;
     String author;
     String categories;
-    int pages;
-    String publisher;
-    String pubDate;
-    String status;  //Status is True while in stock
+    private int pages;
+    private String publisher;
+    private String pubDate;
+    private String status;  //Status is True while in stock
     int custID;     //Identifies which customer currently has the book
-    LocalDate checkedOut;
-    LocalDate dueDate;
-    double price;
-    double charged;
+    private LocalDate checkedOut;
+    private LocalDate dueDate;
+    private double price;
+    private double charged;
 
     //Constructor
     Book(int m, String i, String t, String a, String g, int p, String pub, String pd,

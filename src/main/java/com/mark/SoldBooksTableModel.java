@@ -3,11 +3,11 @@ package com.mark;
 import javax.swing.table.AbstractTableModel;
 import java.util.Vector;
 
-public class SoldBooksTableModel extends AbstractTableModel {
+class SoldBooksTableModel extends AbstractTableModel {
 
-    private Vector<SoldBook> booksList;
+    private final Vector<SoldBook> booksList;
 
-    private String[] colNames = { "BookID", "Title", "Author", "CustomerID", "First Name", "Last Name", "Sold Price", "Date Sold"};
+    private final String[] colNames = { "BookID", "Title", "Author", "CustomerID", "First Name", "Last Name", "Sold Price", "Date Sold"};
 
     SoldBooksTableModel(Vector<SoldBook> books) {
         booksList = books;

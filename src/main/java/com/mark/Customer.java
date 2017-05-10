@@ -2,7 +2,7 @@ package com.mark;//Class contains the program's customer object class
 
 import java.util.Date;
 
-public class Customer {
+class Customer {
 
     //Establish variables to be held by object
     int customerID;
@@ -15,8 +15,8 @@ public class Customer {
     String phone;
     String email;
     String creditCard;
-    int checkedOut;
-    Double totalCharge;
+    private int checkedOut;
+    private Double totalCharge;
     Date addDate;
 
     //Constructor

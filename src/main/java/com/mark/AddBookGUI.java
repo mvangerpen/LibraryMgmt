@@ -6,8 +6,6 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Random;
 
-import static jdk.nashorn.internal.objects.NativeMath.round;
-
 public class AddBookGUI extends JFrame {
     private JTextField authorField;
     private JTextField titleField;
@@ -23,7 +21,7 @@ public class AddBookGUI extends JFrame {
     private JButton autoFillButton;
     private JSpinner copiesSpinner;
 
-    private Controller controller;
+    private final Controller controller;
 
     AddBookGUI(Controller controller) {
         super("Mybrarian: Add a Book");
@@ -42,7 +40,7 @@ public class AddBookGUI extends JFrame {
 
     }
 
-    void addListeners() {
+    private void addListeners() {
 
         autoFillButton.addActionListener(new ActionListener() {
             @Override
@@ -145,7 +143,7 @@ public class AddBookGUI extends JFrame {
         }); //Opens main menu, disposes window
     }
 
-    protected void responseComplete(Book response) {
+    void responseComplete(Book response) {
 
         isbnField.setText(String.valueOf(response.getIsbn()));
         titleField.setText(response.getTitle());
@@ -161,8 +159,7 @@ public class AddBookGUI extends JFrame {
     private Double setPrice(int pages){
 
         Double price = pages * .05;
-        Double rounded = (double) Math.round(price * 100)/100;
-        return rounded;
+        return (double) Math.round(price * 100)/100;
 
     }
 

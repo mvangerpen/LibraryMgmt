@@ -3,13 +3,13 @@ package com.mark;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.lang.reflect.Array;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Random;
 
+@SuppressWarnings("unchecked")
 public class NewCustomerGUI extends JFrame {
     private JTextField firstNameField;
     private JTextField lastNameField;
@@ -36,7 +36,7 @@ public class NewCustomerGUI extends JFrame {
     private JComboBox monthBox;
     private JComboBox yearBox;
     private JFormattedTextField cardExpirationField;
-    private Controller controller;
+    private final Controller controller;
     private int newID;  // Contains class-specific variables
 
     NewCustomerGUI(Controller controller) {
@@ -52,7 +52,7 @@ public class NewCustomerGUI extends JFrame {
         setVisible(true);
 
         //Set state combo box options
-        for (String x : controller.states) {
+        for (String x : Controller.states) {
             stateComboBox.addItem(x);
             cardStateComboBox.addItem(x);
         }
@@ -77,7 +77,7 @@ public class NewCustomerGUI extends JFrame {
         addListeners();
     }  //Builds New Customer GUI
 
-    void addListeners() {
+    private void addListeners() {
 
 
         useSameAddressCheckBox.addActionListener(new ActionListener() {

@@ -5,6 +5,7 @@ import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.Vector;
 
+@SuppressWarnings("ALL")
 public class BookSearchGUI extends JFrame {
 
     private JPanel mainPanel;
@@ -21,7 +22,7 @@ public class BookSearchGUI extends JFrame {
     private JButton clearButton;
     private JButton mainMenuButton;
 
-    private Controller controller;
+    private final Controller controller;
 
     //Configure list model
     private JTable booksTable;

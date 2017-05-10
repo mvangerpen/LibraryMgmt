@@ -6,6 +6,7 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Vector;
 
+@SuppressWarnings("unchecked")
 public class CustomerSearchGUI extends JFrame {
     private JPanel mainPanel;
     private JComboBox searchByComboBox;
@@ -21,7 +22,7 @@ public class CustomerSearchGUI extends JFrame {
     private CustTableModel custTableModel;
     private Vector<Customer> customers;
 
-    private Controller controller;
+    private final Controller controller;
 
 
     CustomerSearchGUI(Controller controller) {
@@ -50,7 +51,7 @@ public class CustomerSearchGUI extends JFrame {
         setVisible(true);
     }
 
-    void addListeners() {
+    private void addListeners() {
 
         searchButton.addActionListener(new ActionListener() {
             @Override

@@ -5,11 +5,11 @@ import com.mark.Customer;
 import javax.swing.table.AbstractTableModel;
 import java.util.Vector;
 
-public class CustTableModel extends AbstractTableModel{
+class CustTableModel extends AbstractTableModel{
 
-    private Vector<Customer> customerList;
+    private final Vector<Customer> customerList;
 
-    private String[] colNames = { "Customer ID", "First Name", "Last Name", "Phone", "Email"};
+    private final String[] colNames = { "Customer ID", "First Name", "Last Name", "Phone", "Email"};
 
     CustTableModel(Vector<Customer> customers) {
         customerList = customers;

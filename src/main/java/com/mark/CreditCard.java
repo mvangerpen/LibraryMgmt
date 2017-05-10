@@ -1,16 +1,15 @@
 package com.mark;
 
-import java.util.ArrayList;
 import java.util.Date;
 
-public class CreditCard {
+class CreditCard {
 
     //Establish object variables
     int custID;
     String type;
     String nameOnCard;
     Long number;
-    Date expiration;
+    private Date expiration;
     int csv;
     String cardAddress;
     String cardCity;
@@ -99,7 +98,7 @@ public class CreditCard {
 
     public Date getExpiration() { return expiration; }
 
-    public void setExpiration(Date expiration) {
+    private void setExpiration(Date expiration) {
         this.expiration = expiration;
     }
 

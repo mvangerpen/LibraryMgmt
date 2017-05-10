@@ -23,7 +23,7 @@ public class CheckOutGUI extends JFrame {
     private JPanel mainPanel;
     private JTextField statusField;
     private JTextField checkedOutField;
-    private Controller controller;
+    private final Controller controller;
 
 
     CheckOutGUI(Controller controller, Book book) {

@@ -1,17 +1,13 @@
 package com.mark;
 
-import com.sun.xml.internal.fastinfoset.util.CharArray;
-
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.time.LocalDateTime;
 import java.util.*;
 
-import static java.util.Calendar.MONTH;
-import static javax.swing.UIManager.get;
 
-
+@SuppressWarnings("ALL")
 public class CreditCardGUI extends JFrame {
     private JComboBox cardTypeComboBox;
     private JTextField cardNumberField;
@@ -30,7 +26,7 @@ public class CreditCardGUI extends JFrame {
     private JComboBox expYearBox;
     private JTextField cardLNameField;
 
-    private Controller controller;
+    private final Controller controller;
     private CreditCard newCard;     //Contains class-specific variables
 
     public CreditCardGUI(Controller controller, CreditCard oldCard) {
@@ -51,7 +47,7 @@ public class CreditCardGUI extends JFrame {
 
         //Configure combo box options
         //States
-        for (String x : controller.states) {
+        for (String x : Controller.states) {
             stateComboBox.addItem(x);
         }
 
@@ -76,7 +72,7 @@ public class CreditCardGUI extends JFrame {
     }   //Builds new credit card GUI
 
 
-    void addListeners(CreditCard oldCard) {
+    private void addListeners(CreditCard oldCard) {
 
         sameAsCustomerAddressCheckBox.addActionListener(new ActionListener() {
             @Override
@@ -97,7 +93,7 @@ public class CreditCardGUI extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String number = cardNumberField.getText();
-                if (!controller.isValidCreditCard(number)) {
+                if (!Controller.isValidCreditCard(number)) {
                     JOptionPane.showMessageDialog(CreditCardGUI.this, "Invalid card number. Check number and try again.");
                 } else {
                     //Collect card values
@@ -154,7 +150,7 @@ public class CreditCardGUI extends JFrame {
     }
 
 
-    void addInfo(CreditCard card) {
+    private void addInfo(CreditCard card) {
         nameOnCardField.setText(card.getNameOnCard());
         cardTypeComboBox.setSelectedItem(card.getType());
         cardNumberField.setText(String.valueOf(card.getNumber()));

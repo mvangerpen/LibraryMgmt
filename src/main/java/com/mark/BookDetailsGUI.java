@@ -23,7 +23,7 @@ public class BookDetailsGUI extends JFrame {
     private JTextField priceField;
     private JTextField statusField;
     private JTextField customerField;
-    private Controller controller;
+    private final Controller controller;
 
 
     BookDetailsGUI(Controller controller, Book book) {
@@ -70,7 +70,7 @@ public class BookDetailsGUI extends JFrame {
 
     }
 
-    void addListeners(Book book) {
+    private void addListeners(Book book) {
 
         editDetailsButton.addActionListener(new ActionListener() {
             @Override

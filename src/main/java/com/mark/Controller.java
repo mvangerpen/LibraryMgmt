@@ -6,17 +6,17 @@ import java.util.List;
 
 public class Controller {
 
-    static DB db;
+    private static DB db;
     static MainMenu mainMenu;
-    static BookSearchGUI bookSearchGUI;
-    static CustomerSearchGUI customerSearchGUI;
-    static CustomerDetailsGUI customerDetailsGUI;
-    static NewCustomerGUI newCustomerGUI;
-    static AddBookGUI addBookGUI;
-    static BookDetailsGUI newBookDetailsGUI;
-    static CreditCardGUI creditCardGUI;
-    static CheckOutGUI checkOutGUI;
-    static ReportsGUI reportsGUI;
+    private static BookSearchGUI bookSearchGUI;
+    private static CustomerSearchGUI customerSearchGUI;
+    private static CustomerDetailsGUI customerDetailsGUI;
+    private static NewCustomerGUI newCustomerGUI;
+    private static AddBookGUI addBookGUI;
+    private static BookDetailsGUI newBookDetailsGUI;
+    private static CreditCardGUI creditCardGUI;
+    private static CheckOutGUI checkOutGUI;
+    private static ReportsGUI reportsGUI;
     static final List<String> states = Arrays.asList("MN","AK","AL","AR","AZ","CA","CO","CT","DC","DE","FL","GA",
             "GU","HI", "IA","ID","IL","IN","KS","KY","LA","MA","MD","ME","MH","MI","MN","MO","MS","MT","NC","ND","NE",
             "NH","NJ","NM","NV","NY", "OH","OK","OR","PA","PR","PW","RI","SC","SD","TN","TX","UT","VA","VI","VT","WA",
@@ -90,10 +90,7 @@ public class Controller {
             total += numArray[x];
         }
 
-        if (total % 10 == 0){
-            return true;}
-        else
-            return false;
+        return total % 10 == 0;
     } //Validates credit card number
 
 

@@ -3,18 +3,18 @@ package com.mark;
 
 import org.joda.time.LocalDate;
 
-public class SoldBook {
+class SoldBook {
 
-    int dBookID;
-    String dTitle;
-    String dAuthor;
-    String dISBN;
-    int dCustID;
-    String dFirstName;
-    String dLastName;
-    Long dCreditCard;
-    Double dSalePrice;
-    LocalDate dDateSold;
+    private int dBookID;
+    private String dTitle;
+    private String dAuthor;
+    private String dISBN;
+    private int dCustID;
+    private String dFirstName;
+    private String dLastName;
+    private Long dCreditCard;
+    private Double dSalePrice;
+    private LocalDate dDateSold;
 
     //Constructor
     public SoldBook(int dBookID, String dTitle, String dAuthor, String dISBN, int dCustID, String dFirstName,

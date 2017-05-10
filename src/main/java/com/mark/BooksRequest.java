@@ -7,10 +7,9 @@ import org.json.JSONObject;
 import javax.swing.*;
 import java.io.*;
 import java.net.URL;
-import java.util.concurrent.ExecutionException;
 
 
-public class BooksRequest {
+class BooksRequest {
 
     public static void getByISBN(String isbn, AddBookGUI addBookGUI) {
 
@@ -20,8 +19,8 @@ public class BooksRequest {
 
     private static class BookAPIWorker extends SwingWorker<Book, Void> {
 
-        String isbn;
-        AddBookGUI gui;
+        final String isbn;
+        final AddBookGUI gui;
 
         public BookAPIWorker(String isbn, AddBookGUI addBookGUI) {
             this.isbn = isbn;
@@ -213,10 +212,9 @@ public class BooksRequest {
         }
 
 
-    private String readKey(AddBookGUI gui) throws Exception {
+    private String readKey(AddBookGUI gui) {
         try (BufferedReader reader = new BufferedReader(new FileReader("key.txt"))) {
-            String key = reader.readLine();
-            return key;
+            return reader.readLine();
         } catch (Exception ioe) {
             JOptionPane.showMessageDialog(gui, "API key file not found.");
             System.exit(-1);

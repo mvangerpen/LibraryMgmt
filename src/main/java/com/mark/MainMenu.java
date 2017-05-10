@@ -12,7 +12,7 @@ public class MainMenu extends JFrame {
     private JButton addBookButton;
     private JButton reportsButton;
 
-    private Controller controller;
+    private final Controller controller;
 
     MainMenu(Controller controller) {
         super("Mybrarian: Main Menu");

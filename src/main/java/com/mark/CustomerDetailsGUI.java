@@ -7,6 +7,7 @@ import java.awt.event.*;
 import java.util.Date;
 import java.util.Vector;
 
+@SuppressWarnings({"ALL", "unchecked"})
 public class CustomerDetailsGUI extends JFrame {
     private JTextField firstNameField;
     private JTextField cityField;
@@ -25,12 +26,11 @@ public class CustomerDetailsGUI extends JFrame {
     private JButton backButton;
     private JButton checkInButton;
     private JButton renewButton;
-    private Controller controller;
+    private final Controller controller;
 
     //Configure table model
     private JTable booksTable;
     private JButton editCustomerButton;
-    private BooksTableModel booksTableModel;
     private Vector<Book> books;
 
     CustomerDetailsGUI(Controller controller, Customer customer) {
@@ -42,7 +42,7 @@ public class CustomerDetailsGUI extends JFrame {
         paintTable(customer);
 
         //Fill state combo box
-        for (String x : controller.states) {
+        for (String x : Controller.states) {
             stateComboBox.addItem(x);
         }
 
@@ -85,7 +85,7 @@ public class CustomerDetailsGUI extends JFrame {
         setVisible(true);
     }
 
-    void addListeners(Customer customer) {
+    private void addListeners(Customer customer) {
 
         editCustomerButton.addActionListener(new ActionListener() {
             @Override
@@ -361,7 +361,7 @@ public class CustomerDetailsGUI extends JFrame {
     private void paintTable(Customer customer){
         //Configure table model
         books = new Vector<>(controller.getCustBooks(customer.getCustomerID()));
-        booksTableModel = new BooksTableModel(books);
+        BooksTableModel booksTableModel = new BooksTableModel(books);
         booksTable.setModel(booksTableModel);
 
         if (books.isEmpty()) {
